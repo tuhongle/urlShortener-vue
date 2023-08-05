@@ -5,7 +5,9 @@
         </div>
         <div class="row">
             <div class="col">
-                <button class="fw-bolder px-0 fs-5 btn border-0">delete</button>
+                <span class="button">
+                    <button class="fw-bolder px-0 fs-5 btn border-0">delete</button>
+                </span>
             </div>
         </div>
     </div>

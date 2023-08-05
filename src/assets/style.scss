@@ -3,7 +3,7 @@ $bootstrap-icons-font-dir: "bootstrap-icons/font/fonts";
 @import "bootstrap-icons/font/bootstrap-icons.scss";
 
 $font-family-base: Poppins;
-$font-size-base: 5rem;
+$font-size-base: 4rem;
 @import 'bootstrap/scss/bootstrap.scss';
 
 .home,
@@ -13,10 +13,14 @@ $font-size-base: 5rem;
             color: rgba(128, 128, 128, 0.4) !important;
         }
     }
-    button {
+    .button {
         background: linear-gradient(to right, #57A3EB, #E65B8A);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+    }
+    button.copy {
+        font-size: 1rem;
+        margin-left: 1.5rem;
     }
 }
 
