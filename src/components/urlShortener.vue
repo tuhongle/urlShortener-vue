@@ -17,7 +17,12 @@
         <div class="row">
             <p class="fw-bolder position-relative d-inline-block" v-if="!isInvalid">
                 <span class="button">{{ urlStore.shortenURL }}</span>
-                <button class="btn btn-secondary copy position-absolute" v-if="urlStore.shortenURL">Copy</button>
+                <button id="copy" class="btn btn-primary position-absolute ms-3" :data-clipboard-text="urlStore.shortenURL" v-if="urlStore.shortenURL" :disabled="isCopied">
+                    <span v-if="!isCopied">
+                        <i class="bi bi-clipboard"></i>
+                    </span>
+                    <span v-else>Copied</span>
+                </button>
             </p>
             <p class="button fw-medium fst-italic" v-else>Please paste an URL to shorten</p>
         </div>
@@ -27,16 +32,25 @@
 <script setup>
 import { ref } from 'vue';
 import { useURLStore } from '../stores/urlShorten.js'
+import ClipboardJS from 'clipboard'
 
+const clipboard = new ClipboardJS('#copy');
 const urlStore = useURLStore();
-const isInvalid = ref(false)
+const isInvalid = ref(false);
+const isCopied = ref(false);
 
-const createURL = () => {
+const createURL = async () => {
     if (urlStore.longURL) {
-        urlStore.createShortURL();
+        await urlStore.createShortURL();
+        await urlStore.addURL();
     } else {
         isInvalid.value = true;
     }
     urlStore.longURL = '';
-}
+};
+
+clipboard.on('success', function(el) {
+    isCopied.value = true;
+});
+
 </script>

@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import db from '../firebase/urlFireStore.js'
+import { collection, addDoc, query, onSnapshot, doc, deleteDoc } from 'firebase/firestore'
 
 export const useURLStore = defineStore('urlShorten', () => {
     const longURL = ref('');
     const shortenURL = ref('');
     const token = '1f9704f667e7be35a9cf112c69e26c371a1a1a1b';
     const isShortening = ref(false);
+    const alias = ref('');
 
     const createShortURL = async () => {
         isShortening.value = true;
@@ -27,5 +29,24 @@ export const useURLStore = defineStore('urlShorten', () => {
         isShortening.value = false;
     };
 
-    return { longURL, shortenURL, createShortURL, isShortening }
+    const addURL = async () => {
+        await addDoc(collection(db, "URLs"), {
+            longUrl: longURL.value,
+            shortUrl: shortenURL.value
+        });
+    }
+
+    const q = query(collection(db, "URLs"));
+    const getURLs = onSnapshot(q, (querySnapshot) => {
+        const URLs = [];
+        querySnapshot.forEach((doc) => {
+            URLs.push(doc.data().shortUrl);
+        });
+      });
+
+    const deleteURL = async () => {
+        await deleteDoc(doc(db, "URLs", alias.value));
+    };
+
+    return { longURL, shortenURL, createShortURL, isShortening, addURL, getURLs, deleteURL }
 })
