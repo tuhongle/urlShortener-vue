@@ -1,16 +1,15 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { collection, getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAKn0YL5WB1VKIOkIe5mck80EwGW1E94_s",
-  authDomain: "url-shorten-db.firebaseapp.com",
-  projectId: "url-shorten-db",
-  storageBucket: "url-shorten-db.appspot.com",
-  messagingSenderId: "218593906613",
-  appId: "1:218593906613:web:029ce095aa72896068d3fc"
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: "employeeapp-35482.firebaseapp.com",
+  projectId: "employeeapp-35482",
+  storageBucket: "employeeapp-35482.appspot.com",
+  messagingSenderId: "444331556617",
+  appId: "1:444331556617:web:2196a27ba2429808ce9dd8"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-export default db
+export const db = getFirestore(app);
+export const colRef = collection(db, 'URLs');

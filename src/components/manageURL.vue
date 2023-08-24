@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { useURLStore } from '../stores/urlShorten';
+import { useURLStore } from '../stores/mmURLStore';
 
 const urlStore = useURLStore();
 
