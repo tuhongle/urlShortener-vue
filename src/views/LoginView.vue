@@ -5,7 +5,7 @@ const urlStore = useURLStore();
 </script>
 
 <template>
-    <div class="login text-start bg-white shadow-sm p-4 p-md-5">
+    <div class="login text-start bg-white shadow-sm p-4">
         <div class="card shadow p-5">
             <div class="greetings-wrapper d-flex justify-content-between align-items-center mb-4">
                 <div class="brand-logo d-flex align-items-center">
@@ -24,6 +24,7 @@ const urlStore = useURLStore();
                     <div class="form-group mb-3">
                         <input class="form-control shadow-none ps-4 py-3 rounded-0" type="password" placeholder="Password" v-model="urlStore.pass" required>
                     </div>
+                    <p class="text-danger mb-3" v-if="urlStore.loginMsg">{{ urlStore.loginMsg }}</p>
                     <button class="btn btn-primary btn-lg btn-block px-5 py-3" type="submit">SIGN IN</button>
                     <div class="d-flex align-items-center justify-content-between my-3">
                         <div class="">
@@ -34,10 +35,6 @@ const urlStore = useURLStore();
                         </div>
                         <a href="#" class="text-dark">Forgot password?</a>
                     </div>
-            <!--                 <button class="facebook btn btn-primary btn-block py-3 px-4 mb-4">
-                        <i class="ti-facebook"></i>
-                        Connect using facebook
-                    </button> -->
                     <p class="text-center lead">
                         Don't have an account?
                         <RouterLink :to="{ name: 'signup' }">Create</RouterLink>

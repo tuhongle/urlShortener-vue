@@ -7,6 +7,7 @@ import App from './App.vue'
 import router from './router'
 
 import 'bootstrap'
+import '@popperjs/core'
 
 const app = createApp(App)
 

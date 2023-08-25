@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
-import { ref, type FormHTMLAttributes, type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router';
-import { type url, type Doc } from '../types/URLsTypes'
+import { type url, type msgError } from '../types/URLsTypes'
 import { db, colRef } from '../firebase/mmURLdb'
-import { collection, addDoc, query, onSnapshot, doc, deleteDoc, serverTimestamp, orderBy } from 'firebase/firestore'
+import { addDoc, query, getDocs, doc, deleteDoc, serverTimestamp, orderBy } from 'firebase/firestore'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, getAuth, updateEmail, updateProfile, type User, type Auth, onAuthStateChanged } from 'firebase/auth'
 
 export const useURLStore = defineStore('urlShorten', () => {
@@ -12,7 +12,7 @@ export const useURLStore = defineStore('urlShorten', () => {
     const shortenURL : Ref<string> = ref('');
     const token : string = import.meta.env.VITE_TOKEN_TLY;
     const isShortening : Ref<boolean> = ref(false);
-    const alias : Ref<string> = ref('');
+    const home = ref<boolean>(false);
 
     const Router = useRouter();
     const isAuth : Ref<boolean> = ref(false);
@@ -20,11 +20,12 @@ export const useURLStore = defineStore('urlShorten', () => {
     const mail = ref<string>('');
     const pass = ref<string>('');
     const name = ref<string>('');
-    const fullName = ref<string>('');
 
     const userMail = ref<string>("");
     const userName = ref<string>("");
-    const agreeMsg = ref<string>("");
+
+    const loginMsg = ref<string>("");
+    const signUpMsg = ref<string>("");
 
     const createShortURL = async () => {
         isShortening.value = true;
@@ -53,14 +54,18 @@ export const useURLStore = defineStore('urlShorten', () => {
     }
 
     const q = query(colRef, orderBy('createdAt'));
-    const getURLs = onSnapshot(q, (querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            URLs.value.push({...doc.data(), id: doc.id});
-        });
-    });
 
-    const deleteURL = async () => {
-        await deleteDoc(doc(db, "URLs", alias.value));
+    const getURLs = async() => {
+        const urls : url[] = [];
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            urls.push({...doc.data(), id: doc.id});
+        });
+        return urls;
+    }
+
+    const deleteURL = async (data: string) => {
+        await deleteDoc(doc(db, "URLs", data));
     };
 
 
@@ -69,36 +74,40 @@ export const useURLStore = defineStore('urlShorten', () => {
     const signUp = async () => {
         try {
             if (termAgree.value) {
-                agreeMsg.value = '';
+                signUpMsg.value = '';
                 await createUserWithEmailAndPassword(auth, mail.value, pass.value);
-                await updateEmail(auth.currentUser, mail.value);
-                await updateProfile(auth.currentUser, {
-                    displayName: fullName.value
+                await updateEmail(auth.currentUser!, mail.value);
+                await updateProfile(auth.currentUser!, {
+                    displayName: name.value
                 });
                 $reset();
             } else {
-                agreeMsg.value = 'Please Agree Our Terms & Conditions';
+                signUpMsg.value = 'Please Agree Our Terms & Conditions';
             }
         } 
         catch (err) {
-            console.log(err)
+            if (err instanceof codeError) {
+                if (err.code === 'auth/weak-password') {
+                    signUpMsg.value = 'Your Password need to be at least 6 characters.'
+                }
+            }
         }
     }
 
     const logIn = async () => {
         try {
-           const login = await signInWithEmailAndPassword(auth, mail.value, pass.value);
-           console.log(login)
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    isAuth.value = true;
-                    Router.push('/manage');
-                }
-            });
+           await signInWithEmailAndPassword(auth, mail.value, pass.value);
             $reset();
         }
         catch (err) {
-            console.log(err);
+            switch (err.code) {
+                case 'auth/user-not-found':
+                loginMsg.value = "Couldn't find your account";
+                break;
+                case 'auth/wrong-password':
+                loginMsg.value = 'Wrong password. Try again or click Forgot password to reset it.';
+                break;
+            }
         }
     }
 
@@ -110,11 +119,13 @@ export const useURLStore = defineStore('urlShorten', () => {
         if (user) {
             isAuth.value = true;
             userMail.value = user.email;
-            userName.value = user.
+            userName.value = user.displayName;
             Router.push('/manage');
+            home.value = true;
         } else {
             isAuth.value = false;
             Router.push('/');
+            home.value = false;
         }
     })
 
@@ -122,10 +133,11 @@ export const useURLStore = defineStore('urlShorten', () => {
         mail.value = '';
         pass.value = '';
         name.value = '';
-        fullName.value = '';
+        loginMsg.value = '';
+        signUpMsg.value = '';
     }
 
-    return { longURL, shortenURL, createShortURL, isShortening, addURL, getURLs, deleteURL,
-            isAuth, termAgree, name, pass, mail, fullName, agreeMsg, signUp, logIn, logOut
+    return { longURL, shortenURL, home, URLs, createShortURL, isShortening, addURL, getURLs, deleteURL,
+            isAuth, termAgree, name, pass, mail, userMail, userName, loginMsg, signUpMsg, signUp, logIn, logOut
     }
 })

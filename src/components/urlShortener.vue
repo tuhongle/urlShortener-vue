@@ -1,10 +1,7 @@
 <template>
     <div class="container-fluid py-3">
         <div class="row mb-5">
-            <input class="form-control border-0 shadow-none fw-bolder" type="text" placeholder="paste a long url" v-model="urlStore.longURL" required>
-        </div>
-        <div class="row mb-5">
-            <input class="form-control border-0 shadow-none fw-bolder" type="text" placeholder="optional custom alias">
+            <input ref="longURLInput" class="form-control border-0 shadow-none fw-bolder" type="text" placeholder="paste a long url" v-model="urlStore.longURL" required @focus="onfocus = true, urlStore.longURL = ''">
         </div>
         <div class="row mb-5">
             <div class="col">
@@ -14,7 +11,7 @@
                 </span>
             </div>
         </div>
-        <div class="row">
+        <div class="row" v-if="!onfocus">
             <p class="fw-bolder position-relative d-inline-block" v-if="!isInvalid">
                 <span class="button">{{ urlStore.shortenURL }}</span>
                 <button id="copy" class="btn btn-primary position-absolute ms-3" :data-clipboard-text="urlStore.shortenURL" v-if="urlStore.shortenURL" :disabled="isCopied">
@@ -30,27 +27,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useURLStore } from '../stores/mmURLStore'
 import ClipboardJS from 'clipboard'
 
 const clipboard = new ClipboardJS('#copy');
 const urlStore = useURLStore();
-const isInvalid = ref(false);
-const isCopied = ref(false);
+const isInvalid = ref<boolean>(false);
+const isCopied = ref<boolean>(false);
+const onfocus = ref<boolean>(false);
+const longURLInput = ref(null);
 
 const createURL = async () => {
     if (urlStore.longURL) {
+        isInvalid.value = false;
+        onfocus.value = false;
         await urlStore.createShortURL();
         await urlStore.addURL();
+        longURLInput.value.style.opacity = 0.5;
     } else {
         isInvalid.value = true;
+        onfocus.value = false;
     }
-    urlStore.longURL = '';
+    // urlStore.longURL = '';
 };
 
-clipboard.on('success', function(el) {
+clipboard.on('success', function() {
     isCopied.value = true;
+});
+
+onMounted(() => {
+    if (urlStore.longURL) {
+        onfocus.value = false;
+        longURLInput.value.style.opacity = 0.5;
+    } else {
+        onfocus.value = true;
+    }
 });
 
 </script>
