@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, type Ref } from 'vue'
 import { useRouter } from 'vue-router';
-import { type url, type msgError } from '../types/URLsTypes'
+import { type url, codeError } from '../types/URLsTypes'
 import { db, colRef } from '../firebase/mmURLdb'
 import { addDoc, query, getDocs, doc, deleteDoc, serverTimestamp, orderBy } from 'firebase/firestore'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, getAuth, updateEmail, updateProfile, type User, type Auth, onAuthStateChanged } from 'firebase/auth'
@@ -100,13 +100,15 @@ export const useURLStore = defineStore('urlShorten', () => {
             $reset();
         }
         catch (err) {
-            switch (err.code) {
-                case 'auth/user-not-found':
-                loginMsg.value = "Couldn't find your account";
-                break;
-                case 'auth/wrong-password':
-                loginMsg.value = 'Wrong password. Try again or click Forgot password to reset it.';
-                break;
+            if (err instanceof codeError) {
+                switch (err.code) {
+                    case 'auth/user-not-found':
+                    loginMsg.value = "Couldn't find your account";
+                    break;
+                    case 'auth/wrong-password':
+                    loginMsg.value = 'Wrong password. Try again or click Forgot password to reset it.';
+                    break;
+                }
             }
         }
     }
@@ -118,8 +120,8 @@ export const useURLStore = defineStore('urlShorten', () => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             isAuth.value = true;
-            userMail.value = user.email;
-            userName.value = user.displayName;
+            userMail.value = user.email!;
+            userName.value = user.displayName!;
             Router.push('/manage');
             home.value = true;
         } else {

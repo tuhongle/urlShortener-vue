@@ -9,9 +9,11 @@ export interface msgError {
     code: 'auth/weak-password' | 'auth/user-not-found' | 'auth/wrong-password';
 }
 
-/* export class codeError extends Error implements msgError {
-    constructor(code: msgError) {
-        super(code)
+export class codeError extends Error implements msgError {
+    code;
+    constructor(msg: string, code: 'auth/weak-password' | 'auth/user-not-found' | 'auth/wrong-password') {
+        super(msg);
+        this.code = code;
     }
 
-} */
+}
