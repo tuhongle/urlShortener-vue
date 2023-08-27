@@ -1,15 +1,15 @@
 <template>
     <div class="container-fluid py-3">
-        <div class="row align-items-center mb-4 border-bottom" v-for="url in URLs" :key="url.id">
-            <div class="col-7">
+        <div class="row align-items-center mb-4 border-bottom pb-3" v-for="url in URLs" :key="url.id">
+            <div class="col col-md-7 mb-2 mb-md-0">
                 <p class="text-truncate mb-0" data-bs-toggle="tooltip" data-bs-placement="top" :data-bs-title="url.longUrl">
                     {{ url.longUrl }}
                 </p>
             </div>
-            <div class="col-3">
-                <p class="text-truncate mb-0">{{ url.shortenUrl }}</p>
+            <div class="col">
+                <p class="text-truncate mb-0 button">{{ url.shortenUrl }}</p>
             </div>
-            <div class="col-2 d-flex">
+            <div class="col d-flex">
                 <button class="fw-bolder btn border-0" @click="copyURL($event, url.shortenUrl)">
                     <span>copy</span>
                 </button>
@@ -37,12 +37,12 @@ const deleteLink = async (data: string) => {
     URLs.value = await urlStore.getURLs();
 }
 
-const copyURL = (el, data : string) => {
+const copyURL = (el: MouseEvent, data : any) => {
     try {
         navigator.clipboard.writeText(data);
-        el.target.innerText = 'copied';
+        (el.target! as HTMLElement).innerText = 'copied';
         setTimeout(() => {
-            el.target.innerText = 'copy';
+            (el.target! as HTMLElement).innerText = 'copy';
         }, 2000)
     }
     catch (err) {

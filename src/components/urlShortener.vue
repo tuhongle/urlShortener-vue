@@ -36,7 +36,7 @@ const urlStore = useURLStore();
 const isInvalid = ref<boolean>(false);
 const isCopied = ref<boolean>(false);
 const onfocus = ref<boolean>(false);
-const longURLInput = ref(null);
+const longURLInput = ref();
 
 const createURL = async () => {
     if (urlStore.longURL) {
@@ -44,7 +44,9 @@ const createURL = async () => {
         onfocus.value = false;
         await urlStore.createShortURL();
         await urlStore.addURL();
-        longURLInput.value.style.opacity = 0.5;
+        if (longURLInput.value as HTMLInputElement) {
+            longURLInput.value.style.opacity = 0.5;
+        }
     } else {
         isInvalid.value = true;
         onfocus.value = false;
